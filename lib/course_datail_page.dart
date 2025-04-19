@@ -283,7 +283,7 @@ class _CourseDetailPageState extends State<CourseDetailPage>
   }
 
   // Метод для создания карточки комментария
-  Widget _buildCommentCard(
+Widget _buildCommentCard(
     Map<String, dynamic> comment,
     StateSetter setModalState,
   ) {
@@ -306,59 +306,56 @@ class _CourseDetailPageState extends State<CourseDetailPage>
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                if (isCommentOwner)
+                if (isCommentOwner || _userRole == 'admin')
                   Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed:
-                            () =>
-                                _showEditCommentDialog(comment, setModalState),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () async {
-                          bool? confirm = await showDialog<bool>(
-                            context: context,
-                            builder:
-                                (context) => AlertDialog(
-                                  title: const Text('Подтверждение'),
-                                  content: const Text(
-                                    'Вы уверены, что хотите удалить этот комментарий?',
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed:
-                                          () => Navigator.pop(context, false),
-                                      child: const Text('Отмена'),
-                                    ),
-                                    TextButton(
-                                      onPressed:
-                                          () => Navigator.pop(context, true),
-                                      child: const Text(
-                                        'Удалить',
-                                        style: TextStyle(color: Colors.red),
-                                      ),
-                                    ),
-                                  ],
+                      if (isCommentOwner)
+                        IconButton(
+                          icon: const Icon(Icons.edit, size: 20),
+                          onPressed: () => _showEditCommentDialog(comment, setModalState),
+                        ),
+                      if (_userRole == 'admin')
+                        IconButton(
+                          icon: const Icon(Icons.delete, size: 20),
+                          onPressed: () async {
+                            bool? confirm = await showDialog<bool>(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text('Подтверждение'),
+                                content: const Text(
+                                  'Вы уверены, что хотите удалить этот комментарий?',
                                 ),
-                          );
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context, false),
+                                    child: const Text('Отмена'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context, true),
+                                    child: const Text(
+                                      'Удалить',
+                                      style: TextStyle(color: Colors.red),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
 
-                          if (confirm == true) {
-                            DatabaseHelper dbHelper = DatabaseHelper();
-                            await dbHelper.deleteComment(comment['comment_id']);
-                            // Обновляем список комментариев
-                            List<Map<String, dynamic>> updatedComments =
-                                await dbHelper
-                                    .getCommentsWithUserNameByCourseId(
+                            if (confirm == true) {
+                              DatabaseHelper dbHelper = DatabaseHelper();
+                              await dbHelper.deleteComment(comment['comment_id']);
+                              // Обновляем список комментариев
+                              List<Map<String, dynamic>> updatedComments =
+                                  await dbHelper.getCommentsWithUserNameByCourseId(
                                       widget.courseId,
-                                    );
-                            setModalState(() {
-                              _comments = updatedComments;
-                            });
-                          }
-                        },
-                      ),
+                                  );
+                              setModalState(() {
+                                _comments = updatedComments;
+                              });
+                            }
+                          },
+                        ),
                     ],
                   ),
               ],
@@ -375,7 +372,7 @@ class _CourseDetailPageState extends State<CourseDetailPage>
       ),
     );
   }
-
+  
   // Метод для отправки отдельного вопроса
   void _submitQuestion(Map<String, dynamic> test) async {
     if (_userAnswers[test['test_id']] == null) {
