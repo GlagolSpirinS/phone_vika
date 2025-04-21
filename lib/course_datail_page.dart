@@ -315,7 +315,7 @@ Widget _buildCommentCard(
                           icon: const Icon(Icons.edit, size: 20),
                           onPressed: () => _showEditCommentDialog(comment, setModalState),
                         ),
-                      if (_userRole == 'admin')
+                      if (isCommentOwner ||_userRole == 'admin')
                         IconButton(
                           icon: const Icon(Icons.delete, size: 20),
                           onPressed: () async {
